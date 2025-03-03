@@ -12,4 +12,6 @@ This project analyzes **COVID-19 case trends** using **Python and MySQL**. It al
 - **Database:** MySQL 
 - **Libraries Used:** `mysql-connector-python`, `pandas`, `matplotlib`  
 
+![](![images](https://github.com/user-attachments/assets/c12918eb-0c49-48e0-9a9b-b723f91f78f7)
+)
 
