@@ -1,0 +1,125 @@
+-- Step 1: Create Database
+CREATE DATABASE COVID19_Analysis;
+USE COVID19_Analysis;
+
+-- Step 2: Create Table for COVID Data
+CREATE TABLE CovidCases (
+    CaseID INT AUTO_INCREMENT PRIMARY KEY,
+    Country VARCHAR(100) NOT NULL,
+    State VARCHAR(100),
+    City VARCHAR(100),
+    DateReported DATE NOT NULL,
+    Confirmed INT NOT NULL,
+    Deaths INT DEFAULT 0,
+    Recovered INT DEFAULT 0
+);
+import mysql.connector
+import pandas as pd
+
+# Database Connection
+db = mysql.connector.connect(
+    host="localhost",
+    user="your_user",
+    password="your_password",
+    database="COVID19_Analysis"
+)
+cursor = db.cursor()
+
+# Load CSV File
+df = pd.read_csv("covid_data.csv")
+
+# Insert Data into MySQL
+for _, row in df.iterrows():
+    query = """
+    INSERT INTO CovidCases (CaseID, Country, State, City, DateReported, Confirmed, Deaths, Recovered)
+    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+    """
+    values = (row["CaseID"], row["Country"], row["State"], row["City"], row["DateReported"], row["Confirmed"], row["Deaths"], row["Recovered"])
+    cursor.execute(query, values)
+
+db.commit()
+print("Data inserted successfully from CSV!")
+
+-- Update Death Count
+def update_deaths(case_id, new_death_count):
+    query = "UPDATE CovidCases SET Deaths = %s WHERE CaseID = %s"
+    cursor.execute(query, (new_death_count, case_id))
+    db.commit()
+    print(f"\nUpdated Case ID {case_id} with Death Count: {new_death_count}")
+
+update_deaths(1, 210)
+--Delete a Record
+def delete_case(case_id):
+    query = "DELETE FROM CovidCases WHERE CaseID = %s"
+    cursor.execute(query, (case_id,))
+    db.commit()
+    print(f"\nDeleted Case ID: {case_id}")
+
+delete_case(3)
+
+--Plot COVID-19 Trends
+import matplotlib.pyplot as plt
+
+def plot_cases():
+    query = "SELECT DateReported, SUM(Confirmed) FROM CovidCases GROUP BY DateReported"
+    cursor.execute(query)
+    data = cursor.fetchall()
+
+    dates = [row[0] for row in data]
+    cases = [row[1] for row in data]
+
+    plt.figure(figsize=(10,5))
+    plt.plot(dates, cases, marker='o', linestyle='-', color='b', label="Confirmed Cases")
+    plt.xlabel('Date')
+    plt.ylabel('Confirmed Cases')
+    plt.title('COVID-19 Case Trends')
+    plt.legend()
+    plt.show()
+
+plot_cases()
+  
+--Most Affected Countries
+def most_affected_countries():
+    query = "SELECT Country, SUM(Confirmed) FROM CovidCases GROUP BY Country ORDER BY SUM(Confirmed) DESC LIMIT 5"
+    cursor.execute(query)
+    data = cursor.fetchall()
+
+    print("\nMost Affected Countries:\n")
+    for row in data:
+        print(f"Country: {row[0]}, Cases: {row[1]}")
+
+most_affected_countries()
+
+--Total Deaths Reported Globally
+def total_deaths():
+    query = "SELECT SUM(Deaths) FROM CovidCases"
+    cursor.execute(query)
+    data = cursor.fetchone()
+
+    print(f"\nTotal Deaths Globally: {data[0]}")
+
+total_deaths()
+
+--Exporting MySQL Data Back to CSV
+def export_to_csv():
+    query = "SELECT * FROM CovidCases"
+    cursor.execute(query)
+    data = cursor.fetchall()
+
+    df = pd.DataFrame(data, columns=["CaseID", "Country", "State", "City", "DateReported", "Confirmed", "Deaths", "Recovered"])
+    df.to_csv("exported_covid_data.csv", index=False)
+    print("\n✅ Data exported successfully to 'exported_covid_data.csv'!")
+
+export_to_csv()
+--Total Deaths Reported Globally
+def total_deaths():
+    query = "SELECT SUM(Deaths) FROM CovidCases"
+    cursor.execute(query)
+    data = cursor.fetchone()
+
+    print(f"\nTotal Deaths Globally: {data[0]}")
+
+total_deaths()
+
+
+
