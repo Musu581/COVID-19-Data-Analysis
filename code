@@ -108,7 +108,7 @@ def export_to_csv():
 
     df = pd.DataFrame(data, columns=["CaseID", "Country", "State", "City", "DateReported", "Confirmed", "Deaths", "Recovered"])
     df.to_csv("exported_covid_data.csv", index=False)
-    print("\n✅ Data exported successfully to 'exported_covid_data.csv'!")
+    print("\nData exported successfully to 'exported_covid_data.csv'!")
 
 export_to_csv()
 --Total Deaths Reported Globally
